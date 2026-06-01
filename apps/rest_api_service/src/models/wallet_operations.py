@@ -2,8 +2,8 @@ from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Num
     Enum, func
 from sqlalchemy.orm import relationship
 
-from apps.rest_api_service.src.database import Base
-from apps.rest_api_service.enums import OperationType, StatusPayment
+from  src.database import Base
+from  enums import OperationType, StatusPayment
 
 
 class WalletOperation(Base):

@@ -2,8 +2,8 @@
 from sqlalchemy import (Column, Integer,   DateTime,  ForeignKey,  Enum,
                         func, String, Numeric)
 from sqlalchemy.orm import relationship
-from apps.rest_api_service.src.database import Base
-from apps.rest_api_service.enums import OrderStatus
+from src.database import Base
+from enums import OrderStatus
 
 class Order(Base):
     __tablename__ = 'orders'

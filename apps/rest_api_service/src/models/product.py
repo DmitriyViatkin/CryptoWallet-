@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime,   ForeignKey, Numeric, func
 from sqlalchemy.orm import relationship
 
-from apps.rest_api_service.src.database import Base
+from src.database import Base
 
 
 class Product(Base):

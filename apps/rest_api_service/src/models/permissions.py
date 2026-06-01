@@ -1,8 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Numeric, \
-    Table, Boolean
+from sqlalchemy import Column, Integer,  ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from apps.rest_api_service.src.database import Base
+from  src.database import Base
 
 class Permission(Base):
     __tablename__ = 'permissions'

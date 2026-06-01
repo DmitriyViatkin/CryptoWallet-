@@ -2,8 +2,8 @@ from sqlalchemy import (Column, Integer, String, DateTime, Enum, ForeignKey,  fu
                         UniqueConstraint)
 from sqlalchemy.orm import relationship
 
-from apps.rest_api_service.enums import WalletType
-from apps.rest_api_service.src.database import Base
+from enums import WalletType
+from src.database import Base
 
 class Wallet(Base):
     __tablename__ = 'wallets'

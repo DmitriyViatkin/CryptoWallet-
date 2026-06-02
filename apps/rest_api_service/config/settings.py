@@ -10,8 +10,11 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from infra.config.base_settings import (BaseInfraSettings, InfraSettings,
-                                          get_infra_settings)
+from .infra.config.base_settings import (
+    BaseInfraSettings,
+    InfraSettings,
+    get_infra_settings,
+)
 
 
 class RestAPIServiceSettings(BaseInfraSettings):
@@ -35,7 +38,10 @@ class RestAPIServiceSettings(BaseInfraSettings):
     BASE_URL: str = Field(default="http://localhost:8001")
 
     # JWT authentication settings
-    SECRET_KEY: str  # Secret key for signing JWT tokens
+    # NOTE: a default development secret is provided so the app can start
+    # without an external .env. Replace with a secure value in production
+    # by setting AUTH_SECRET_KEY in your environment or .env file.
+    SECRET_KEY: str = Field(default="dev-secret")  # Secret key for signing JWT tokens
     ALGORITHM: str = "HS256"  # Hashing algorithm for JWT
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15  # Access token lifetime in minutes
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30  # Refresh token lifetime in days

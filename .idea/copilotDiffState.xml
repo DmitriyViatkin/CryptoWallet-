@@ -21,15 +21,6 @@
             </PendingDiffInfo>
           </value>
         </entry>
-        <entry key="$PROJECT_DIR$/apps/rest_api_service/config/ioc.py">
-          <value>
-            <PendingDiffInfo>
-              <option name="filePath" value="$PROJECT_DIR$/apps/rest_api_service/config/ioc.py" />
-              <option name="originalContent" value="&quot;&quot;&quot; Main dependencies &quot;&quot;&quot;&#10;from dishka import make_async_container&#10;&#10;from apps.rest_api_service.config.infra.config.base_settings import InfraSettings&#10;from infra.config.base_settings import infra_settings&#10;from infra.providers.redis_provider import RedisProvider&#10;from infra.providers.postgres_provider import PostgresProvider&#10;from infra.providers.rabbit_provider import RabbirProvider&#10;&#10;container = make_async_container(&#10;&#10; RedisProvider(),&#10;          PostgresProvider(),&#10;          RabbirProvider(),&#10;&#10;    context = {InfraSettings: infra_settings}&#10;)" />
-              <option name="updatedContent" value="&quot;&quot;&quot;Dependency injection container configuration.&#10;&#10;This module sets up the dishka IoC (Inversion of Control) container&#10;with all application providers for dependency injection.&#10;&quot;&quot;&quot;&#10;&#10;from dishka import make_async_container&#10;&#10;from apps.rest_api_service.config.infra.config.base_settings import InfraSettings&#10;from infra.config.base_settings import infra_settings&#10;from infra.providers.redis_provider import RedisProvider&#10;from infra.providers.postgres_provider import PostgresProvider&#10;from infra.providers.rabbit_provider import RabbitProvider&#10;&#10;# Create async DI container with all providers and settings&#10;container = make_async_container(&#10;    # Data store providers&#10;    RedisProvider(),&#10;    PostgresProvider(),&#10;    RabbitProvider(),&#10;&#10;    # Global context settings&#10;    context={InfraSettings: infra_settings}&#10;)&#10;" />
-            </PendingDiffInfo>
-          </value>
-        </entry>
       </map>
     </option>
   </component>

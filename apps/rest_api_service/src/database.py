@@ -6,7 +6,7 @@ database session management for the application using async patterns.
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
-from infra.config.base_settings import get_infra_settings
+from config.infra.config.base_settings import get_infra_settings
 from typing import AsyncGenerator
 
 # Base class for all ORM models

@@ -10,7 +10,7 @@ CONFIG_ROOT = os.path.join(SERVICE_ROOT, 'config')
 sys.path.insert(0, SERVICE_ROOT)
 sys.path.insert(0, CONFIG_ROOT)
 
-from infra.config.base_settings import get_infra_settings
+from config.infra.config.base_settings import get_infra_settings
 from src.database import Base
 from src.models import *  # noqa
 

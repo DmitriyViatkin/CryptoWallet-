@@ -9,7 +9,7 @@ from collections.abc import AsyncGenerator
 from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
                                     AsyncEngine,create_async_engine)
 
-from apps.rest_api_service.config.infra.config.base_settings import InfraSettings
+from  config.infra.config.base_settings import InfraSettings
 
 
 class PostgresProvider(Provider):
@@ -35,7 +35,7 @@ class PostgresProvider(Provider):
             infra_settings.db.url,
             echo=infra_settings.db.ECHO,
             pool_size=infra_settings.db.POOL_SIZE,
-            max_overflow=infra_settings.db.MAX_OVERFLOW,
+            max_overflow=infra_settings.db.POOL_MAX_OVERFLOW,
             pool_pre_ping=infra_settings.db.POOL_PRE_PING,
         )
         yield engine

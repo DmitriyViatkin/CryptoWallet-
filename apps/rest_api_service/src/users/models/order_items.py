@@ -14,4 +14,5 @@ class OrderItems(Base):
 
 
     product = relationship("Product", back_populates="order_items")
-    order  = relationship("Order", back_populates="item")
+    order = relationship("Order",
+                         back_populates="items")

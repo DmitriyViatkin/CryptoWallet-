@@ -9,7 +9,7 @@ from typing import AsyncGenerator
 from faststream.rabbit import RabbitBroker
 from dishka import Provider, Scope, provide
 
-from apps.rest_api_service.config.infra.config.base_settings import InfraSettings
+from  config.infra.config.base_settings import InfraSettings
 
 
 class RabbitProvider(Provider):

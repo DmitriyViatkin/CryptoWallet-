@@ -24,4 +24,4 @@ class Wallet(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
 
     user = relationship("User", back_populates="wallets")
-    wallet_operations = relationship("WalletOperation", back_populates="wallet")
+    operations = relationship("WalletOperation", back_populates="wallet")

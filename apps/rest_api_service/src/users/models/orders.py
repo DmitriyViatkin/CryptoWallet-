@@ -18,5 +18,5 @@ class Order(Base):
     amount = Column(Numeric(38, 18), nullable=False)
 
     items = relationship("OrderItems", back_populates="order")
-    buyer = relationship("User")
+    buyer = relationship("User", back_populates="orders")
 

@@ -12,6 +12,7 @@ from typing import Any, Optional
 from pathlib import Path
 from functools import lru_cache
 
+from pydantic import PrivateAttr
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -44,12 +45,6 @@ class BaseInfraSettings(BaseSettings):
 
 # --- DATABASE ---
 class DatabaseSettings(BaseInfraSettings):
-    """PostgreSQL database configuration settings.
-
-    Manages connection parameters and connection pool settings for async
-    PostgreSQL connections using SQLAlchemy. Loads configuration from
-    environment variables with DB_ prefix.
-    """
     model_config = SettingsConfigDict(
         env_file=str(ENV_PATH),
         env_file_encoding="utf-8",
@@ -58,86 +53,68 @@ class DatabaseSettings(BaseInfraSettings):
     )
 
     # Connection parameters
-    HOST: str = "localhost"  # Database host
-    PORT: int = 5432  # Database port
-    USER: str  # Database user
-    PASSWORD: str  # Database password
-    DB: str  # Database name
+    HOST: str = "localhost"
+    PORT: int = 5432
+    USER: str
+    PASSWORD: str
+    DB: str
 
-    # Connection pool and logging settings
-    ECHO: bool = False  # Log all SQL statements
-    ECHO_POOL: bool = False  # Log connection pool events
-    POOL_DISABLED: bool = False  # Use NullPool instead of QueuePool
-    POOL_MAX_OVERFLOW: Optional[int] = None  # Max overflow connections
-    POOL_SIZE: int = 5  # Number of connections to keep in pool
-    POOL_TIMEOUT: int = 30  # Timeout for getting connection from pool
-    POOL_RECYCLE: int = 3600  # Recycle connections after N seconds
-    POOL_PRE_PING: bool = False  # Test connections before using them
+    # SQLAlchemy
+    ECHO: bool = False
+    ECHO_POOL: bool = False
 
-    # Cached engine instance
-    _engine_instance: Optional[AsyncEngine] = None
+    # Pool
+    POOL_DISABLED: bool = False
+    POOL_SIZE: int = 5
+    POOL_TIMEOUT: int = 30
+    POOL_RECYCLE: int = 3600
+    POOL_PRE_PING: bool = True
+
+    # ВАЖНО: не Optional
+    POOL_MAX_OVERFLOW: int = 10
+
+    # Private attribute
+    _engine_instance: AsyncEngine | None = PrivateAttr(default=None)
 
     @property
     def url(self) -> str:
-        """Build database connection URL.
-
-        Returns:
-            str: PostgreSQL async connection string (postgresql+asyncpg://...)
-        """
         return (
-            f"postgresql+asyncpg://{self.USER}:{self.PASSWORD}"
+            f"postgresql+asyncpg://"
+            f"{self.USER}:{self.PASSWORD}"
             f"@{self.HOST}:{self.PORT}/{self.DB}"
         )
 
     def _build_engine_params(self) -> dict[str, Any]:
-        """Build SQLAlchemy engine parameters dictionary.
-
-        Constructs connection pool and engine configuration based on settings.
-
-        Returns:
-            dict[str, Any]: Engine parameters for create_async_engine()
-        """
         params: dict[str, Any] = {
             "url": self.url,
-            "future": True,
             "echo": self.ECHO,
             "echo_pool": self.ECHO_POOL,
             "pool_recycle": self.POOL_RECYCLE,
             "pool_pre_ping": self.POOL_PRE_PING,
         }
+
+        if self.POOL_DISABLED:
+            params["poolclass"] = NullPool
+            return params
+
         params.update(
             pool_size=self.POOL_SIZE,
+            max_overflow=self.POOL_MAX_OVERFLOW,
             pool_timeout=self.POOL_TIMEOUT,
             pool_use_lifo=True,
         )
-        # Add max overflow if specified
-        if self.POOL_MAX_OVERFLOW is not None:
-            params["max_overflow"] = self.POOL_MAX_OVERFLOW
-        # Use NullPool if pool is disabled
-        if self.POOL_DISABLED:
-            params["poolclass"] = NullPool
+
         return params
 
     def get_engine(self) -> AsyncEngine:
-        """Create or return cached async database engine instance.
-
-        Ensures only one engine instance is created (singleton pattern).
-
-        Returns:
-            AsyncEngine: Configured async SQLAlchemy engine.
-        """
-        if self._engine_instance:
-            return self._engine_instance
-        self._engine_instance = create_async_engine(**self._build_engine_params())
+        if self._engine_instance is None:
+            self._engine_instance = create_async_engine(
+                **self._build_engine_params()
+            )
         return self._engine_instance
 
     @property
     def engine(self) -> AsyncEngine:
-        """Get database engine property.
-
-        Returns:
-            AsyncEngine: Current or newly created async engine instance.
-        """
         return self.get_engine()
 
 

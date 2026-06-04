@@ -2,6 +2,8 @@ from typing import Generic, TypeVar, Type
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import Base
 from sqlalchemy import select, update, delete
+from fastapi_pagination.ext.sqlalchemy import paginate
+
 
 Model = TypeVar('Model', bound=Base)
 
@@ -39,3 +41,13 @@ class BaseRepository(Generic[Model]):
         result = await self.session.execute(
             select(self.model).where(self.model.id == id))
         return result.scalar_one_or_none()
+
+    async def get_all_paginated(self):
+        """
+        Ефективно отримує сторінку елементів.
+        Розширення fastapi-pagination самостійно модифікує SQL-запит,
+        додавши туди необхідні LIMIT та OFFSET, а також виконає швидкий COUNT.
+        """
+        query = select(self.model)
+        # Просто передаємо сесію та сам об'єкт запиту (select)
+        return await paginate(self.session, query)

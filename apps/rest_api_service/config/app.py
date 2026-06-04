@@ -1,6 +1,6 @@
 import mimetypes
 from fastapi.staticfiles import StaticFiles
-
+from fastapi_pagination import add_pagination
 # Импортируем готовый инстанс настроек вместо класса
 from config.settings import auth_settings
 from config.infra.builder import FastAPIBuilder
@@ -12,7 +12,7 @@ builder = FastAPIBuilder(
     description=auth_settings.DESCRIPTION,
 )
 app = builder.get_app()
-
+add_pagination(app)
 
 
 # Подключаем роуты аутентификации

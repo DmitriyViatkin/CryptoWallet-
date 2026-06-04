@@ -19,7 +19,7 @@ class ProductService(BaseService[Product]):
         user_id: int,
         title: str,
         wallet_address: str,
-        price: Decimal,  # Decimal-сумісний рядок
+        price: Decimal,
     ) -> Product:
         """
         Створення продукту.
@@ -139,5 +139,9 @@ class ProductService(BaseService[Product]):
             raise ProductAccessDeniedError(
                 "У пользователя нет прав на удаление этого продукта.")
         return await self._product_repo.delete(id=product_id)
+
+    async def get_all_products_paginated(self):
+        # Викликаємо метод з базового репозиторію
+        return await self._product_repo.get_all_paginated()
 
 

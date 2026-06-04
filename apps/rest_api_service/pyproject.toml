@@ -44,6 +44,7 @@ psycopg2-binary = "^2.9.12"
 python-multipart = "^0.0.30"
 pwdlib = {extras = ["argon2"], version = "^0.3.0"}
 cryptography = "^48.0.0"
+fastapi-pagination = "^0.15.14"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2"

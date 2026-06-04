@@ -9,5 +9,5 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 router.include_router(register_router)
 router.include_router(login_router)
-router.include_router(refresh_router)
+#router.include_router(refresh_router)
 router.include_router(me_router)

@@ -43,10 +43,6 @@ async def handle_registration_event(msg: dict) -> None:
     user_id = msg.get("user_id")
     eta = datetime.now(timezone.utc) + timedelta(minutes=1)
 
-    await send_welcome_email_task.kiq(
-        to_email=msg.get("email"),
-    )
-    await enable_chat_access_task.kiq_with_context(
-        user_id=user_id,
-        eta=eta,
+    await send_welcome_email_task.kiq(to_email=msg.get("email"))
+    await enable_chat_access_task.kiq(user_id=user_id
     )

@@ -1,26 +1,25 @@
 import asyncio
 import logging
-
 from src.tasks.broker import broker as taskiq_broker
 
 logger = logging.getLogger(__name__)
 
-
 async def run_worker() -> None:
-    """
-    Worker запускає тільки TaskIQ.
-    FastStream subscribers працюють всередині FastAPI процесу
-    через RabbitProvider (той самий broker інстанс).
-
-    Якщо потрібен окремий процес для consumers —
-    створити окремий entrypoint з власним broker інстансом.
-    """
     logger.info("Starting TaskIQ worker...")
-    async with taskiq_broker:
-        try:
-            await taskiq_broker.listen()
-        except (KeyboardInterrupt, asyncio.CancelledError):
-            logger.info("Worker shutdown")
+
+    try:
+        await taskiq_broker.startup()
+        logger.info("Broker started")
+
+        async for _ in taskiq_broker.listen():
+            pass
+
+    except Exception as e:
+        logger.exception(f"Worker error: {e}")
+
+    finally:
+        await taskiq_broker.shutdown()
+
 
 
 if __name__ == "__main__":

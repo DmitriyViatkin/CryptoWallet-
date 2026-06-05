@@ -2,6 +2,8 @@ from faststream.rabbit import RabbitBroker, RabbitExchange, ExchangeType
 
 from shared.messaging.rabbit_settings import rabbit_topology
 from shared.messaging.schemas.password_reset_request_event import PasswordResetRequestEvent
+from shared.messaging.schemas.user_register_event import UserRegisteredEvent
+
 
 _exchange = RabbitExchange(
     name=rabbit_topology.exchange_name,
@@ -29,4 +31,15 @@ class EventPublisher:
             event,
             exchange=_exchange,
             routing_key=rabbit_topology.rk_password_reset,
+        )
+
+    async def publish_user_registered(self, user_id: int, email: str) -> None:
+        event = UserRegisteredEvent(
+            user_id=str(user_id),
+            email=email,
+        )
+        await self._broker.publish(
+            event,
+            exchange=_exchange,
+            routing_key=rabbit_topology.rk_user_registered,
         )

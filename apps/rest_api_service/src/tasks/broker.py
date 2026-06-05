@@ -32,8 +32,10 @@ def create_broker() -> AioPikaBroker:
         declare_queues_kwargs={"durable": True},  # черги теж зробимо durable
         qos=10,
     ).with_result_backend(redis_backend)
-    
+
     return broker
 
 # Створюємо глобальний екземпляр брокера, який буде використовуватись воркерами та API
 broker = create_broker()
+import src.tasks.email_tasks
+import src.tasks.access_chat

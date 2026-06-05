@@ -11,6 +11,7 @@ class JWTService:
         self._algorithm = auth_settings.ALGORITHM
         self._access_expire = auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES
         self._refresh_expire = auth_settings.REFRESH_TOKEN_EXPIRE_DAYS
+        self._reset_expire = getattr(auth_settings, "RESET_TOKEN_EXPIRE_MINUTES", 15)
 
     def create_access_token(self, user_id: int) -> str:
         return self._encode(
@@ -22,6 +23,12 @@ class JWTService:
         return self._encode(
             {"sub": str(user_id), "type": "refresh"},
             timedelta(days=self._refresh_expire),
+        )
+
+    def create_reset_token(self, user_id: int) -> str:
+        return self._encode(
+            {"sub": str(user_id), "type": "reset"},
+            timedelta(minutes=self._reset_expire),
         )
 
     def decode(self, token: str) -> dict:

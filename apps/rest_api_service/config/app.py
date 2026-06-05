@@ -6,10 +6,22 @@ from config.settings import auth_settings
 from config.infra.builder import FastAPIBuilder
 from src.auth.routers.router import router as auth_router
 from src.users.routers.product_rout.product_rout import router as product_router
-# Инициализируем билдер, передавая значения из инстанса auth_settings
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from src.tasks.broker import broker
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await broker.startup()
+    yield
+    await broker.shutdown()
+
+
 builder = FastAPIBuilder(
     title=auth_settings.TITLE,
     description=auth_settings.DESCRIPTION,
+    lifespan=lifespan
 )
 app = builder.get_app()
 add_pagination(app)

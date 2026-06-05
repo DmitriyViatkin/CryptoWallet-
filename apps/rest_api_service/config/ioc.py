@@ -5,6 +5,8 @@ with all application providers for dependency injection.
 """
 
 from dishka import make_async_container
+from faststream.rabbit import RabbitBroker
+
 
 from config.infra.config.base_settings import InfraSettings
 from config.infra.config.base_settings import infra_settings

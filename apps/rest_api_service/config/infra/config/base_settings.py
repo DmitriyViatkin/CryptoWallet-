@@ -241,9 +241,10 @@ class RabbitMQSettings(BaseInfraSettings):
         Returns:
             str: AMQP connection string (amqp://user:password@host:port/vhost).
         """
+        vhost = self.VHOST.lstrip("/")
         return (
             f"amqp://{self.USER}:{self.PASSWORD}"
-            f"@{self.HOST}:{self.PORT}/{self.VHOST}"
+            f"@{self.HOST}:{self.PORT}/{vhost}"
         )
 
 

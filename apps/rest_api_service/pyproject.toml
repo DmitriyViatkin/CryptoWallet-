@@ -28,9 +28,10 @@ pydantic-settings = "^2.3"
 faststream = {extras = ["rabbit"], version = "^0.5"}
 
 # tasks
-taskiq = "^0.11"
+taskiq = "^0.12"
 taskiq-fastapi = "^0.3"
 taskiq-aio-pika = "^0.4"
+taskiq-redis = "^1.2.2"
 
 # email + http
 fastapi-mail = "^1.4"
@@ -39,7 +40,7 @@ httpx = "^0.27"
 # storage
 boto3 = "^1.34"
 dishka = "^1.10.1"
-redis = "^8.0.0"
+redis = "^7.0.0"
 psycopg2-binary = "^2.9.12"
 python-multipart = "^0.0.30"
 pwdlib = {extras = ["argon2"], version = "^0.3.0"}

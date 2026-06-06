@@ -46,15 +46,23 @@ class UserService(BaseService[User]):
         return await self._user_repo.get_by_id(user_id)
 
     async def update_profile(self, user_id: int, **kwargs) -> User | None:
-        """
-        Оновлення профілю.
-        - Якщо передається новий email — перевірка унікальності
-        - Якщо передається новий пароль — хешування
-        """
         user = await self._user_repo.get_by_id(user_id)
         if not user:
             return None
-        raise NotImplementedError
+
+        # Перевірка унікальності email якщо змінюється
+        if "email" in kwargs and kwargs["email"] != user.email:
+            existing = await self._user_repo.get_by_email(kwargs["email"])
+            if existing:
+                raise ValueError("Email already in use")
+
+        # Перевірка унікальності username якщо змінюється
+        if "username" in kwargs and kwargs["username"] != user.username:
+            existing = await self._user_repo.get_by_username(kwargs["username"])
+            if existing:
+                raise ValueError("Username already taken")
+
+        return await self._user_repo.update(user, **kwargs)
 
     async def deactivate(self, user_id: int) -> User | None:
         """М'яке видалення — встановлює is_active=False."""

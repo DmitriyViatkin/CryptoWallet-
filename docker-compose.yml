@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # Сервис брокера сообщений (RabbitMQ)
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: cryptowallet_rabbitmq
+    ports:
+      - "5672:5672"    # Порт для подключения приложения (AMQP)
+      - "15672:15672"  # Порт для веб-панели управления
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq  # Чтобы очереди и данные не пропадали при перезапуске
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - wallet_network
+
+# Объявляем общие ресурсы: сеть и хранилище данных
+networks:
+  wallet_network:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:

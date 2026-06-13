@@ -6,4 +6,3 @@ class ImportWalletRequest(BaseModel):
 
     user_id: UUID
     private_key: Optional[str] = None
-    #mnemonic: Optional[str] = None

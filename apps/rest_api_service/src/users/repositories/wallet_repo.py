@@ -10,12 +10,13 @@ class WalletRepository(BaseRepository[Wallet]):
 
     async def get_by_address(self, address: str) -> Wallet | None:
         result = await self.session.execute(
-            select(Wallet).where(Wallet.address == address)
+            select(Wallet).where(Wallet.wallet_address == address)
         )
         return result.scalar_one_or_none()
+
     async def get_by_address_and_user(self,address: str, user_id: int)-> Wallet | None:
         result = await self.session.execute(
-            select(Wallet).where(Wallet.address == address, Wallet.user_id == user_id)
+            select(Wallet).where(Wallet.wallet_address == address, Wallet.user_id == user_id)
         )
         return result.scalar_one_or_none()
 

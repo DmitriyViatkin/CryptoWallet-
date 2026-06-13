@@ -33,6 +33,10 @@ class RabbitMQTopology(BaseModel):
     # тому для AioPikaBroker вказуємо окрему чергу для задач
     taskiq_queue: str = "auth.taskiq.tasks"
 
-
+    rk_wallet_import: str = "eth.wallet.import"
+    rk_wallet_imported: str = "eth.wallet.imported"
+    wallet_import_queue: str = "eth.wallet.import"
+    wallet_imported_queue: str = "eth.wallet.imported"
+    
 # Створюємо єдиний об'єкт конфігурації (Singleton) для використання в коді
 rabbit_topology = RabbitMQTopology()

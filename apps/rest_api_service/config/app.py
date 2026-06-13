@@ -12,7 +12,7 @@ from src.tasks.broker import broker
 from src.auth.routers.router import router as auth_router
 from src.users.routers.product_rout.product_rout import router as product_router
 from src.users.routers.users.user_router import router as user_router
-
+from src.users.routers.wallets.wallet_router import router as wallet_router
 
 
 
@@ -36,3 +36,5 @@ add_pagination(app)
 app.include_router(auth_router)
 app.include_router(product_router)
 app.include_router(user_router)
+
+app.include_router(wallet_router)

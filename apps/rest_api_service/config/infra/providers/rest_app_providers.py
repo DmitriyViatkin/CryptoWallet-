@@ -7,10 +7,23 @@ from src.users.repositories import (
 from src.users.services import (
     UserService, WalletService, OrderService, ProductService
 )
-
+from src.users.services.wallet_serv import WalletService
+from src.publisher import EventPublisher
+from redis.asyncio import Redis
 
 
 class RestAppProviders(Provider):
+
+    @provide(scope=Scope.REQUEST)
+    async def wallet_service(
+            self,
+            wallet_repo: WalletRepository,
+            wallet_operation_repo: WalletOperationRepository,
+            publisher: EventPublisher,
+            redis: Redis,
+    ) -> WalletService:
+        return WalletService(wallet_repo, wallet_operation_repo, publisher, redis)
+
 
     @provide(scope=Scope.REQUEST)
     def provide_user_repo(self, session: AsyncSession) -> UserRepository:
@@ -47,12 +60,7 @@ class RestAppProviders(Provider):
         return UserService(user_repo, permission_repo)
 
     @provide(scope=Scope.REQUEST)
-    def provide_wallet_service(
-            self,
-            wallet_repo: WalletRepository,
-            wallet_operation_repo: WalletOperationRepository,
-    ) -> WalletService:
-        return WalletService(wallet_repo, wallet_operation_repo)
+
 
     @provide(scope=Scope.REQUEST)
     def provide_order_service(

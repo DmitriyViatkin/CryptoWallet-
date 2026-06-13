@@ -4,7 +4,7 @@ from aio_pika import connect_robust, ExchangeType
 from aio_pika.abc import AbstractIncomingMessage
 
 from ethereum_service.config.infra.base_settings import rabbitmq_settings
-from infrastructure.cache.job_store import JobStore
+from ethereum_service.config.infra.cache.job_store import JobStore
 
 
 class WalletImportedConsumer:

@@ -37,6 +37,11 @@ class RabbitMQTopology(BaseModel):
     rk_wallet_imported: str = "eth.wallet.imported"
     wallet_import_queue: str = "eth.wallet.import"
     wallet_imported_queue: str = "eth.wallet.imported"
+
     
+    rk_wallet_create: str = "eth.wallet.create"
+    rk_wallet_created: str = "eth.wallet.created"
+    wallet_create_queue: str = "eth.wallet.create"
+    wallet_created_queue: str = "eth.wallet.created"
 # Створюємо єдиний об'єкт конфігурації (Singleton) для використання в коді
 rabbit_topology = RabbitMQTopology()

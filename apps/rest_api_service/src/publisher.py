@@ -4,6 +4,9 @@ from shared.messaging.rabbit_settings import rabbit_topology
 from shared.messaging.schemas.password_reset_request_event import PasswordResetRequestEvent
 from shared.messaging.schemas.user_register_event import UserRegisteredEvent
 from shared.messaging.schemas.wallet.wallet_import_request_event import WalletImportRequestEvent
+from shared.messaging.schemas.wallet.wallet_create_request_event import WalletCreateRequestEvent
+from shared.messaging.schemas.wallet.wallet_created_event import WalletCreatedEvent
+
 
 _exchange = RabbitExchange(
     name=rabbit_topology.exchange_name,
@@ -61,4 +64,19 @@ class EventPublisher:
             event,
             exchange=_exchange,
             routing_key=rabbit_topology.rk_wallet_import,
+        )
+
+    async def publish_wallet_create(
+            self, job_id: str, user_id: int, title: str, wallet_type: str
+    ) -> None:
+        event = WalletCreateRequestEvent(
+            job_id=job_id,
+            user_id=user_id,
+            title=title,
+            wallet_type=wallet_type,
+        )
+        await self._broker.publish(
+            event,
+            exchange=_exchange,
+            routing_key=rabbit_topology.rk_wallet_create,
         )

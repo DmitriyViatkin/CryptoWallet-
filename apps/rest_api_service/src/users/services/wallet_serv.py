@@ -27,15 +27,20 @@ class WalletService(BaseService[Wallet]):
 
     # ── Wallet ────────────────────────────────────────────────────────────────
 
-    async def create_wallet(self, user_id: int, title: str, wallet_type: str) -> Wallet:
-        """
-        Генерація нового гаманця.
-        - web3.py: генерація приватного ключа + адреси
-        - Шифрування приватного ключа (Fernet/AES)
-        - Перевірка UniqueConstraint(user_id, wallet_address)
-        - Збереження в БД
-        """
-        raise NotImplementedError
+    async def create_wallet(
+            self,
+            user_id: int,
+            title: str,
+            wallet_address: str,
+            encrypted_private_key: str,
+    ) -> Wallet:
+        return await self._wallet_repo.create(
+            title=title,
+            wallet_type=WalletType.ETH,
+            private_key_encrypted=encrypted_private_key,
+            wallet_address=wallet_address,
+            user_id=user_id,
+        )
 
     async def import_wallet(
         self, user_id: int,  wallet_address: str, encrypted_private_key: str = "",
@@ -165,3 +170,14 @@ class WalletService(BaseService[Wallet]):
             return None
         import json
         return json.loads(raw)
+
+    async def request_wallet_create(self, user_id: int, title: str) -> str:
+        job_id = str(uuid4())
+        await self._redis.setex(f"job:{job_id}", 300, '{"status":"pending"}')
+        await self._publisher.publish_wallet_create(
+            job_id=job_id,
+            user_id=user_id,
+            title=title,
+            wallet_type="eth",
+        )
+        return job_id

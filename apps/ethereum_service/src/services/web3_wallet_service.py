@@ -1,5 +1,7 @@
 from eth_account import Account
 import httpx
+from web3 import Web3
+from shared.crypto.encryption import encrypt_private_key
 import os
 from decimal import Decimal
 
@@ -9,7 +11,9 @@ from shared.messaging.schemas.wallet.wallet_operation_data import WalletOperatio
 
 ETHERSCAN_API_KEY = os.environ.get("ETHERSCAN_API_KEY")
 ETHERSCAN_BASE_URL = os.environ.get("ETHERSCAN_BASE_URL",
-                                    "https://api.etherscan.io/api")
+                              "https://api.etherscan.io/api")
+RPC_URL = os.environ.get("RPC_URL", "https://eth.llamarpc.com")
+w3 = Web3(Web3.HTTPProvider(RPC_URL))
 class Web3WalletService:
 
     async def import_wallet(self, private_key: str) -> str:
@@ -23,6 +27,16 @@ class Web3WalletService:
             return account.address
         except Exception as e:
             raise ValueError(f"Invalid private key: {e}")
+
+    async def create_wallet(self):
+        """
+        Генерация нового кошельк
+        """
+
+        account = w3.eth.account.create()
+        address = account.address
+        private_key = account.key.hex()
+        return address, encrypt_private_key(private_key)
 
 
     async def get_transactions (self, address: str,
@@ -43,7 +57,7 @@ class Web3WalletService:
             response = await client.get(ETHERSCAN_BASE_URL, params=params)
             data= response.json()
 
-        print(f"[ETHERSCAN RESPONSE] status={response.status_code} data={data}")
+
 
         if data.get("status") != "1":
             return []

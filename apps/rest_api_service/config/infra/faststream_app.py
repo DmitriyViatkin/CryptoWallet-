@@ -15,6 +15,8 @@ from shared.messaging.schemas.password_reset_request_event import \
 from shared.messaging.schemas.user_register_event import UserRegisteredEvent
 from shared.messaging.rabbit_settings import rabbit_topology
 from shared.messaging.schemas.wallet.wallet_imported_event import WalletImportedEvent
+from shared.messaging.schemas.wallet.wallet_created_event import WalletCreatedEvent
+
 
 # Инициализация роутера RabbitMQ
 rabbit_router = RabbitRouter()
@@ -25,7 +27,11 @@ _exchange = RabbitExchange(
     type=ExchangeType.TOPIC,
     durable=True,
 )
-
+_wallet_created_queue = RabbitQueue(
+    name=rabbit_topology.wallet_created_queue,
+    routing_key=rabbit_topology.rk_wallet_created,
+    durable=True,
+)
 # Очередь для уведомлений о сбросе пароля
 _email_queue = RabbitQueue(
     name=rabbit_topology.email_notifications_queue,
@@ -111,4 +117,30 @@ async def handle_wallet_imported(event: WalletImportedEvent) -> None:
                 wallet_address=event.address,
                 encrypted_private_key=event.encrypted_private_key or "",
                 operations=event.operations,
+            )
+
+@rabbit_router.subscriber(_wallet_created_queue, _exchange)
+async def handle_wallet_created(event: WalletCreatedEvent) -> None:
+    from config.ioc import container
+    from redis.asyncio import Redis
+    from src.users.services.wallet_serv import WalletService
+    import json
+
+    if event.error:
+        payload = {"status": "failed", "error": event.error}
+    else:
+        payload = {"status": "done", "address": event.address}
+
+    async with container() as request_container:
+        redis: Redis = await request_container.get(Redis)
+        await redis.setex(f"job:{event.job_id}", 300, json.dumps(payload))
+
+        if not event.error:
+            wallet_service: WalletService = await request_container.get(
+                WalletService)
+            await wallet_service.create_wallet(
+                user_id=event.user_id,
+                title=event.title,
+                wallet_address=event.address,
+                encrypted_private_key=event.encrypted_private_key,
             )

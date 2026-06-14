@@ -6,9 +6,17 @@ from shared.messaging.rabbit_settings import rabbit_topology
 from shared.messaging.schemas.wallet.wallet_import_request_event import WalletImportRequestEvent
 from shared.messaging.schemas.wallet.wallet_imported_event import WalletImportedEvent
 from shared.crypto.encryption import encrypt_private_key
+from shared.messaging.schemas.wallet.wallet_created_event import WalletCreatedEvent
+from shared.messaging.schemas.wallet.wallet_create_request_event import WalletCreateRequestEvent
 
 
 rabbit_router = RabbitRouter()
+
+_wallet_create_queue = RabbitQueue(
+    name=rabbit_topology.wallet_create_queue,
+    routing_key=rabbit_topology.rk_wallet_create,
+    durable=True,
+)
 
 _exchange = RabbitExchange(
     name=rabbit_topology.exchange_name,
@@ -20,6 +28,7 @@ _wallet_import_queue = RabbitQueue(
     routing_key=rabbit_topology.rk_wallet_import,
     durable=True,
 )
+
 
 @rabbit_router.subscriber(_wallet_import_queue, _exchange)
 async def handle_wallet_import(
@@ -77,3 +86,42 @@ async def handle_wallet_import(
         exchange=_exchange,
         routing_key=rabbit_topology.rk_wallet_imported,
     )
+
+@rabbit_router.subscriber(_wallet_create_queue, _exchange)
+async def handle_wallet_create(
+    msg: WalletCreateRequestEvent,
+    broker: Annotated[RabbitBroker, Context()],
+) -> None:
+    from config.ioc import container
+    from src.services.web3_wallet_service import Web3WalletService
+
+    try:
+        async with container() as request_container:
+            service = await request_container.get(Web3WalletService)
+            address, encrypted_key = await service.create_wallet()
+
+        reply = WalletCreatedEvent(
+            job_id=msg.job_id,
+            user_id=msg.user_id,
+            title=msg.title,
+            wallet_type=msg.wallet_type,
+            address=address,
+            encrypted_private_key=encrypted_key,
+        )
+    except Exception as e:
+        reply = WalletCreatedEvent(
+            job_id=msg.job_id,
+            user_id=msg.user_id,
+            title=msg.title,
+            wallet_type=msg.wallet_type,
+            address="",
+            error=str(e),
+        )
+
+    await broker.publish(
+        reply,
+        exchange=_exchange,
+        routing_key=rabbit_topology.rk_wallet_created,
+    )
+
+

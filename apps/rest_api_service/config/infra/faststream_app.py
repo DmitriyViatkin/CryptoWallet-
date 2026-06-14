@@ -84,12 +84,15 @@ async def handle_wallet_imported(event: WalletImportedEvent) -> None:
     Сохраняет результат операции в Redis, чтобы фронтенд мог
     получить статус задачи по job_id.
     """
+
+
     from config.ioc import container
     from redis.asyncio import Redis
     from src.users.services.wallet_serv import WalletService
     import json
 
     if event.error:
+
         payload = {"status": "failed", "error": event.error}
     else:
         payload = {"status": "done", "address": event.address}
@@ -107,4 +110,5 @@ async def handle_wallet_imported(event: WalletImportedEvent) -> None:
                 user_id=event.user_id,
                 wallet_address=event.address,
                 encrypted_private_key=event.encrypted_private_key or "",
-                )
+                operations=event.operations,
+            )

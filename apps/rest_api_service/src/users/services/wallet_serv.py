@@ -1,3 +1,5 @@
+from dns.reversename import from_address
+
 from src.users.models.wallets import Wallet
 from src.users.models.wallet_operations import WalletOperation
 from src.users.repositories.wallet_repo import WalletRepository
@@ -6,7 +8,7 @@ from src.users.services.base_service import BaseService
 from uuid import uuid4
 from redis.asyncio import Redis
 from src.publisher import EventPublisher
-from enums import WalletType
+from enums import WalletType, OperationType, StatusPayment
 
 
 class WalletService(BaseService[Wallet]):
@@ -36,7 +38,9 @@ class WalletService(BaseService[Wallet]):
         raise NotImplementedError
 
     async def import_wallet(
-        self, user_id: int,  wallet_address: str, encrypted_private_key: str = "") -> Wallet:
+        self, user_id: int,  wallet_address: str, encrypted_private_key: str = "",
+        operations: list[WalletOperation] | None = None,
+    ) -> Wallet:
         """
         Імпорт гаманця по приватному ключу.
         - Деривація адреси через web3.py
@@ -46,14 +50,40 @@ class WalletService(BaseService[Wallet]):
         existing = await self._wallet_repo.get_by_address_and_user(
             wallet_address, user_id)
         if existing:
-            return existing
+            wallet = existing
+        else:
+            wallet = await self._wallet_repo.create(
+                title="Imported wallet",
+                wallet_type=WalletType.ETH,
+                private_key_encrypted=encrypted_private_key,
+                wallet_address=wallet_address,
+                user_id=user_id,
+            )
+        if operations:
+            for op in operations:
+                existing_op = await self._operation_repo.get_by_tx_hash(
+                    op.tx_hash)
+                await self._operation_repo.create(
+                    tx_hash = op.tx_hash,
+                    from_address= op.from_address,
+                    to_address= op.to_address,
+                    amount= op.amount,
+                    operation_type= OperationType(op.operation_type),
+                    status = StatusPayment(op.status),
+                    block_number = op.block_number,
+                    wallet_id = wallet.id,
+                    )
+        return wallet
 
+
+    """
         return await self._wallet_repo.create(
-        title="Imported wallet",
-        wallet_type=WalletType.ETH,
-        private_key_encrypted=encrypted_private_key,
-        wallet_address=wallet_address,
-        user_id=user_id,)
+                title="Imported wallet",
+                wallet_type=WalletType.ETH,
+                private_key_encrypted=encrypted_private_key,
+                wallet_address=wallet_address,
+                user_id=user_id,)
+                                    """
 
 
     async def get_user_wallets(self, user_id: int) -> list[Wallet]:

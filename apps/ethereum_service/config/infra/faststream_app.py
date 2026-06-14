@@ -1,3 +1,4 @@
+from faststream.asyncapi.schema import operations
 from faststream.rabbit import RabbitRouter, RabbitExchange, RabbitQueue, ExchangeType, RabbitBroker
 from faststream import Context
 from typing import Annotated
@@ -30,24 +31,25 @@ async def handle_wallet_import(
     # Импорт здесь, чтобы избежать circular import при загрузке модуля
     from config.ioc import container
     from src.services.web3_wallet_service import Web3WalletService
-    print("Container imported successfully")
+
     try:
-        print('block True')
+
 
         async with container() as request_container:  # открываем scope запроса
             service = await request_container.get(Web3WalletService)
-            wallet = await service.import_wallet(
-
-
+            wallet_address = await service.import_wallet(
                 private_key=msg.private_key,
             )
-            wallet = await service.import_wallet(private_key=msg.private_key)
+            operations = await service.get_transactions(wallet_address)
+
             reply = WalletImportedEvent(
                 job_id=msg.job_id,
                 user_id=msg.user_id,
-                address=wallet,
+                address=wallet_address,
                 encrypted_private_key=encrypt_private_key(msg.private_key),
+                operations=operations,
             )
+            print(reply)
 
 
     except Exception as e:

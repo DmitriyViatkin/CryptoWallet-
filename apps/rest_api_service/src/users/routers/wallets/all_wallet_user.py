@@ -21,7 +21,7 @@ async def get_transaction(
     if not wallets:
         raise HTTPException(status_code=404, detail="Wallet not found")
 
-
+# TODO Добавить получение баланса из редиса пр  выводе кошельков
 
 
     return  AllWalletsResponse(items=wallets)

@@ -80,17 +80,6 @@ class WalletService(BaseService[Wallet]):
                     )
         return wallet
 
-
-    """
-        return await self._wallet_repo.create(
-                title="Imported wallet",
-                wallet_type=WalletType.ETH,
-                private_key_encrypted=encrypted_private_key,
-                wallet_address=wallet_address,
-                user_id=user_id,)
-                                    """
-
-
     async def get_user_wallets(self, user_id: int) -> list[Wallet]:
         return await self._wallet_repo.get_by_user_id(user_id)
 

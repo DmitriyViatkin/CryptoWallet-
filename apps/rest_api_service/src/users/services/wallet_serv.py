@@ -170,3 +170,23 @@ class WalletService(BaseService[Wallet]):
             wallet_type="eth",
         )
         return job_id
+
+    async def request_send_transaction(
+            self, user_id: int, wallet_id: int,
+            address_to: str, amount: float
+    ) -> str:
+        wallet = await self._wallet_repo.get_by_id_and_user(wallet_id, user_id)
+        if not wallet:
+            raise ValueError("Wallet not found or access denied")
+
+        job_id = str(uuid4())
+        await self._redis.setex(f"job:{job_id}", 300, '{"status":"pending"}')
+
+        await self._publisher.publish_send_transaction(
+            job_id=job_id,
+            encrypted_private_key=wallet.private_key_encrypted,
+            address_from=wallet.wallet_address,  # ← береться з wallet
+            address_to=address_to,
+            amount=amount,
+        )
+        return job_id

@@ -25,3 +25,12 @@ class WalletRepository(BaseRepository[Wallet]):
         select(Wallet).where(Wallet.user_id == user_id)
         )
         return result.scalars().all()
+
+    async def get_by_id_and_user(self, wallet_id: int, user_id: int) -> Wallet | None:
+        result = await self.session.execute(
+            select(Wallet).where(
+                Wallet.id == wallet_id,
+                Wallet.user_id == user_id,
+            )
+        )
+        return result.scalar_one_or_none()

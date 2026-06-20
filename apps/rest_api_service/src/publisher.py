@@ -6,6 +6,8 @@ from shared.messaging.schemas.user_register_event import UserRegisteredEvent
 from shared.messaging.schemas.wallet.wallet_import_request_event import WalletImportRequestEvent
 from shared.messaging.schemas.wallet.wallet_create_request_event import WalletCreateRequestEvent
 from shared.messaging.schemas.wallet.wallet_created_event import WalletCreatedEvent
+from shared.messaging.schemas.wallet.wallet_send_request_event import WalletSendTransEvent
+
 
 
 _exchange = RabbitExchange(
@@ -80,3 +82,20 @@ class EventPublisher:
             exchange=_exchange,
             routing_key=rabbit_topology.rk_wallet_create,
         )
+
+    async def publish_send_transaction(
+        self,
+        job_id: str,
+        encrypted_private_key: str,  # ← виправлено
+        address_from: str,
+        address_to: str,
+        amount: float,
+    ) -> None:
+        event = WalletSendTransEvent(
+            job_id=job_id,
+            encrypted_private_key=encrypted_private_key,
+            address_from=address_from,
+            address_to=address_to,
+            amount=amount,
+        )
+        await self._broker.publish(event, exchange=_exchange, routing_key=rabbit_topology.rk_send_trans)

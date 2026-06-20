@@ -5,7 +5,14 @@ from fastapi_pagination import add_pagination
 from config.settings import auth_settings
 from config.infra.builder import FastAPIBuilder
 
-# ← всі імпорти через src., не через ethereum_service.src.
+import logging
+
+# Настройка вывода логов в консоль
+logging.basicConfig(
+    level=logging.INFO,  # Уровень логирования (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 

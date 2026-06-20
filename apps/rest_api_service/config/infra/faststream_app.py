@@ -16,6 +16,9 @@ from shared.messaging.schemas.user_register_event import UserRegisteredEvent
 from shared.messaging.rabbit_settings import rabbit_topology
 from shared.messaging.schemas.wallet.wallet_imported_event import WalletImportedEvent
 from shared.messaging.schemas.wallet.wallet_created_event import WalletCreatedEvent
+from shared.messaging.schemas.wallet.wallet_send_request_event import WalletSendTransEvent
+from shared.messaging.schemas.wallet.wallet_send_event import WalletSentTransEvent
+
 
 
 # Инициализация роутера RabbitMQ
@@ -50,6 +53,20 @@ _registration_queue = RabbitQueue(
 _wallet_imported_queue = RabbitQueue(
     name=rabbit_topology.wallet_imported_queue,
     routing_key=rabbit_topology.rk_wallet_imported, durable=True)
+
+# Черги для транзакцій
+_wallet_send_trans_queue = RabbitQueue(
+    name=rabbit_topology.wallet_send_trans_queue,
+    routing_key=rabbit_topology.rk_send_trans,
+    durable=True,
+)
+_wallet_sent_trans_queue = RabbitQueue(
+    name=rabbit_topology.wallet_sent_trans_queue,
+    routing_key=rabbit_topology.rk_sent_trans,
+    durable=True,
+)
+
+
 
 
 @rabbit_router.subscriber(_email_queue, _exchange)
@@ -144,3 +161,18 @@ async def handle_wallet_created(event: WalletCreatedEvent) -> None:
                 wallet_address=event.address,
                 encrypted_private_key=event.encrypted_private_key,
             )
+
+    @rabbit_router.subscriber(_wallet_sent_trans_queue, _exchange)
+    async def handle_wallet_sent_trans(event: WalletSentTransEvent) -> None:
+        from config.ioc import container
+        from redis.asyncio import Redis
+        import json
+
+        if event.error:
+            payload = {"status": "failed", "error": event.error}
+        else:
+            payload = {"status": "done", "tx_hash": event.tx_hash}
+
+        async with container() as request_container:
+            redis: Redis = await request_container.get(Redis)
+            await redis.setex(f"job:{event.job_id}", 300, json.dumps(payload))

@@ -43,5 +43,15 @@ class RabbitMQTopology(BaseModel):
     rk_wallet_created: str = "eth.wallet.created"
     wallet_create_queue: str = "eth.wallet.create"
     wallet_created_queue: str = "eth.wallet.created"
+
+    # --- Send transaction (запит на відправку) ---
+    rk_send_trans: str = "eth.wallet.send_trans"
+    wallet_send_trans_queue: str = "eth.wallet.send_trans"
+
+    # --- Sent transaction (результат після виконання) ---
+    rk_sent_trans: str = "eth.wallet.sent_trans"
+    wallet_sent_trans_queue: str = "eth.wallet.sent_trans"
+
+
 # Створюємо єдиний об'єкт конфігурації (Singleton) для використання в коді
 rabbit_topology = RabbitMQTopology()

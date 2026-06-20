@@ -8,7 +8,8 @@ from shared.messaging.schemas.wallet.wallet_imported_event import WalletImported
 from shared.crypto.encryption import encrypt_private_key
 from shared.messaging.schemas.wallet.wallet_created_event import WalletCreatedEvent
 from shared.messaging.schemas.wallet.wallet_create_request_event import WalletCreateRequestEvent
-
+from shared.messaging.schemas.wallet.wallet_send_request_event import WalletSendTransEvent
+from shared.messaging.schemas.wallet.wallet_send_event import  WalletSentTransEvent
 
 rabbit_router = RabbitRouter()
 
@@ -28,7 +29,11 @@ _wallet_import_queue = RabbitQueue(
     routing_key=rabbit_topology.rk_wallet_import,
     durable=True,
 )
-
+_wallet_send_trans_queue = RabbitQueue(
+    name=rabbit_topology.wallet_send_trans_queue,
+    routing_key=rabbit_topology.rk_send_trans,
+    durable=True,
+)
 
 @rabbit_router.subscriber(_wallet_import_queue, _exchange)
 async def handle_wallet_import(
@@ -125,3 +130,37 @@ async def handle_wallet_create(
     )
 
 
+@rabbit_router.subscriber(_wallet_send_trans_queue, _exchange)
+async def handle_send_transaction(event: WalletSendTransEvent) -> None:
+    from config.ioc import container
+    from faststream.rabbit import RabbitBroker
+    import json
+
+    private_key = decrypt_private_key(event.encrypted_private_key)  # розшифровуємо
+
+    web3_service = Web3WalletService()
+    receipt = await web3_service.send_transaction(
+        address_from=event.address_from,
+        private_key=private_key,
+        address_to=event.address_to,
+        amount=event.amount,
+    )
+
+    if receipt:
+        result = WalletSentTransEvent(
+            job_id=event.job_id,
+            tx_hash=receipt["transactionHash"].hex(),
+        )
+    else:
+        result = WalletSentTransEvent(
+            job_id=event.job_id,
+            error="Transaction failed",
+        )
+
+    async with container() as request_container:
+        broker: RabbitBroker = await request_container.get(RabbitBroker)
+        await broker.publish(
+            result,
+            exchange=_exchange,
+            routing_key=rabbit_topology.rk_sent_trans,
+        )

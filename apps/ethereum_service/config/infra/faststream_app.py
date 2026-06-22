@@ -131,36 +131,42 @@ async def handle_wallet_create(
 
 
 @rabbit_router.subscriber(_wallet_send_trans_queue, _exchange)
-async def handle_send_transaction(event: WalletSendTransEvent) -> None:
+async def handle_send_transaction(
+    event: WalletSendTransEvent,
+    broker: Annotated[RabbitBroker, Context()],
+) -> None:
     from config.ioc import container
-    from faststream.rabbit import RabbitBroker
-    import json
+    from src.services.web3_wallet_service import Web3WalletService
 
-    private_key = decrypt_private_key(event.encrypted_private_key)  # розшифровуємо
+    try:
+        async with container() as request_container:
+            web3_service = await request_container.get(Web3WalletService)
+            receipt = await web3_service.send_transaction(
+                address_from=event.address_from,
+                encrypted_private_key=event.encrypted_private_key,  # ← саме так називається в send_transaction
+                address_to=event.address_to,
+                amount=event.amount,
+            )
 
-    web3_service = Web3WalletService()
-    receipt = await web3_service.send_transaction(
-        address_from=event.address_from,
-        private_key=private_key,
-        address_to=event.address_to,
-        amount=event.amount,
+        if receipt:
+            result = WalletSentTransEvent(
+                job_id=event.job_id,
+                tx_hash=receipt["transactionHash"].hex(),
+            )
+        else:
+            result = WalletSentTransEvent(
+                job_id=event.job_id,
+                error="Transaction failed",
+            )
+
+    except Exception as e:
+        result = WalletSentTransEvent(
+            job_id=event.job_id,
+            error=str(e),
+        )
+
+    await broker.publish(
+        result,
+        exchange=_exchange,
+        routing_key=rabbit_topology.rk_sent_trans,
     )
-
-    if receipt:
-        result = WalletSentTransEvent(
-            job_id=event.job_id,
-            tx_hash=receipt["transactionHash"].hex(),
-        )
-    else:
-        result = WalletSentTransEvent(
-            job_id=event.job_id,
-            error="Transaction failed",
-        )
-
-    async with container() as request_container:
-        broker: RabbitBroker = await request_container.get(RabbitBroker)
-        await broker.publish(
-            result,
-            exchange=_exchange,
-            routing_key=rabbit_topology.rk_sent_trans,
-        )

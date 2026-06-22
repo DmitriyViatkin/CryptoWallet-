@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/apps/ethereum_service" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/apps/ethereum_service/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/apps/rest_api_service/.venv" />
+      <excludeFolder url="file://$MODULE_DIR$/apps/block_listener/.venv" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.12 (CryptoWallet-)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

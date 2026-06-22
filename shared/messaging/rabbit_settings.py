@@ -52,6 +52,17 @@ class RabbitMQTopology(BaseModel):
     rk_sent_trans: str = "eth.wallet.sent_trans"
     wallet_sent_trans_queue: str = "eth.wallet.sent_trans"
 
+# --- Block listener: детект транзакций по нашим адресам ---
+    # Публікується block_listener, коли в блоці знайдена транзакція,
+    # що стосується одного з наших гаманців
+    rk_tx_detected: str = "eth.wallet.tx_detected"
+    tx_detected_queue: str = "eth.wallet.tx_detected"
 
+    # --- Block listener: синхронізація адрес гаманців ---
+    # Публікується auth_service при створенні/імпорті гаманця,
+    # щоб block_listener додав адресу в свій Redis-кеш для фільтрації блоків
+    # TODO: підтвердити контракт перед реалізацією consumer'а в block_listener
+    rk_wallet_address_registered: str = "eth.wallet.address_registered"
+    wallet_address_registered_queue: str = "eth.wallet.address_registered"
 # Створюємо єдиний об'єкт конфігурації (Singleton) для використання в коді
 rabbit_topology = RabbitMQTopology()

@@ -10,7 +10,8 @@ from fastapi import Depends
 router = APIRouter(route_class=DishkaRoute)
 
 
-@router.post("/create", status_code=status.HTTP_202_ACCEPTED, response_model=ImportWalletResponse)
+@router.post("/create", status_code=status.HTTP_202_ACCEPTED,
+             response_model=ImportWalletResponse)
 async def create_wallet(
     body: CreateWalletRequest,
     service: FromDishka[WalletService],

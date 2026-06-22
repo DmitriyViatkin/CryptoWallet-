@@ -1,0 +1,30 @@
+[project]
+name = "block-listener"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Dmitriy",email = "ViatkinDima@gmail.com"}
+]
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+web3 = "^7.16.0"
+redis = "^8.0.0"
+pydantic = "^2.13.4"
+pydantic-settings = "^2.14.2"
+dishka = "^1.10.1"
+faststream = {version = "^0.6.0", extras = ["rabbit", "cli"]}
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "pytest-asyncio (>=1.4.0,<2.0.0)",
+    "ruff (>=0.15.18,<0.16.0)",
+    "mypy (>=2.1.0,<3.0.0)"
+]

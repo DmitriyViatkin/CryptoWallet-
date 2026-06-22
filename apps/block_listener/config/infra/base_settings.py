@@ -79,6 +79,8 @@ class AlchemySettings(BaseInfraSettings):
     RESYNC_INTERVAL_SEC: int = 3600  # для периодической реконсиляции адресов, обсуждали выше
 
 
+
+
 # --- MAIN ---
 class InfraSettings(BaseInfraSettings):
     redis: RedisSettings = Field(default_factory=RedisSettings)

@@ -34,6 +34,8 @@ class WalletService(BaseService[Wallet]):
             wallet_address: str,
             encrypted_private_key: str,
     ) -> Wallet:
+        await self._redis.sadd("wallets:addresses", wallet_address.lower())
+
         return await self._wallet_repo.create(
             title=title,
             wallet_type=WalletType.ETH,
@@ -64,6 +66,8 @@ class WalletService(BaseService[Wallet]):
                 wallet_address=wallet_address,
                 user_id=user_id,
             )
+        await self._redis.sadd("wallets:addresses", wallet_address.lower())
+
         if operations:
             for op in operations:
                 existing_op = await self._operation_repo.get_by_tx_hash(
